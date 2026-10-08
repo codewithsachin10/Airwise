@@ -1,0 +1,11 @@
+timestamp,arrivals,passengerCount,availableTaxis,holiday,weatherCondition
+2026-10-08T18:00:00,16,1450,780,true,Rain
+2026-10-08T16:00:00,12,1100,820,false,Clear
+2026-10-08T14:00:00,10,920,850,false,Clear
+2026-10-08T12:00:00,14,1280,790,false,Cloudy
+2026-10-08T10:00:00,18,1620,740,true,Clear
+2026-10-08T08:00:00,20,1780,710,true,Clear
+2026-10-08T06:00:00,15,1310,760,false,Cloudy
+2026-10-08T04:00:00,8,680,600,false,Clear
+2026-10-08T02:00:00,5,420,520,false,Clear
+2026-10-08T00:00:00,6,490,550,false,Clear

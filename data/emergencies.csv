@@ -1,0 +1,11 @@
+emergencyId,location,timestamp,emergencyType,responseMinutes,medicalTeamAvailable,ambulanceAvailable,outcome
+M-501,Terminal 1,2026-10-08T17:15:00,Fainting,4,true,true,Treated
+M-502,Security,2026-10-08T15:40:00,Cardiac Emergency,7,true,true,Transferred
+M-503,Gate Area,2026-10-08T13:20:00,Breathing Problem,5,true,true,Stabilized
+M-504,Baggage Hall,2026-10-08T11:05:00,Injury,8,true,false,Treated
+M-505,Terminal 2,2026-10-08T09:30:00,Accident,12,false,true,Transferred
+M-506,Terminal 1,2026-10-07T21:10:00,Fainting,3,true,true,Treated
+M-507,Gate Area,2026-10-07T18:45:00,Cardiac Emergency,6,true,true,Stabilized
+M-508,Security,2026-10-07T14:15:00,Breathing Problem,9,true,false,Stabilized
+M-509,Terminal 2,2026-10-07T10:00:00,Injury,5,true,true,Treated
+M-510,Baggage Hall,2026-10-06T19:50:00,Accident,11,false,false,Transferred
