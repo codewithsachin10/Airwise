@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html_head('Complaint ' + ${complaint.referenceNo})}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: alert_ticker}"></div>
+<div th:replace="~{fragments/layout :: navbar}"></div>
+<div th:replace="~{fragments/layout :: flash_messages}"></div>
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold text-navy-900 m-0"><i class="bi bi-file-earmark-text text-primary me-2"></i>Passenger Report Record</h2>
+                    <span class="text-muted small">Tracking reference: <strong class="font-monospace text-primary" th:text="${complaint.referenceNo}">AW-CP-39184</strong></span>
+                </div>
+                <a th:href="@{/complaints/track}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Tracker
+                </a>
+            </div>
+
+            <!-- Status Tracker Timeline Box -->
+            <div class="aw-card p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold m-0 text-navy-900">Lifecycle Progress</h6>
+                    <span class="badge"
+                          th:classappend="${complaint.status.name() == 'RESOLVED' ? 'bg-success' : (complaint.status.name() == 'IN_PROGRESS' ? 'bg-warning text-dark' : 'bg-primary')}"
+                          th:text="${complaint.status}">UNDER_REVIEW</span>
+                </div>
+                <div class="progress" style="height: 10px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                         th:style="${complaint.status.name() == 'SUBMITTED' ? 'width: 20%' : (complaint.status.name() == 'UNDER_REVIEW' ? 'width: 40%' : (complaint.status.name() == 'ASSIGNED' ? 'width: 60%' : (complaint.status.name() == 'IN_PROGRESS' ? 'width: 80%' : 'width: 100%')))}">
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between small text-muted mt-2">
+                    <span>Submitted</span>
+                    <span>Review</span>
+                    <span>Assigned</span>
+                    <span>In Progress</span>
+                    <span>Resolved</span>
+                </div>
+            </div>
+
+            <!-- AI Classification Intelligence Box -->
+            <div class="aw-card mb-4 border-info border-opacity-50" th:if="${analysis != null}" style="background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%);">
+                <div class="aw-card-header bg-navy-800 text-white">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-cpu-fill text-info fs-5"></i>
+                        <h5 class="fw-bold m-0 text-white">AI Passenger Complaint Intelligence Analysis</h5>
+                    </div>
+                    <span class="badge bg-secondary badge-demo">Native Java NLP Classifier</span>
+                </div>
+                <div class="aw-card-body">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-3 col-6">
+                            <span class="text-muted small text-uppercase d-block">Detected Category</span>
+                            <strong class="text-primary fs-6" th:text="${analysis.detectedCategory}">Baggage Problems</strong>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <span class="text-muted small text-uppercase d-block">Sentiment Evaluation</span>
+                            <span th:if="${analysis.sentiment.name() == 'NEGATIVE'}" class="badge bg-danger"><i class="bi bi-emoji-frown me-1"></i> NEGATIVE</span>
+                            <span th:if="${analysis.sentiment.name() == 'NEUTRAL'}" class="badge bg-secondary"><i class="bi bi-emoji-neutral me-1"></i> NEUTRAL</span>
+                            <span th:if="${analysis.sentiment.name() == 'POSITIVE'}" class="badge bg-success"><i class="bi bi-emoji-smile me-1"></i> POSITIVE</span>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <span class="text-muted small text-uppercase d-block">Urgency / Priority</span>
+                            <span th:if="${analysis.priority.name() == 'URGENT'}" class="badge bg-danger pulse-badge">URGENT</span>
+                            <span th:if="${analysis.priority.name() == 'HIGH'}" class="badge bg-warning text-dark">HIGH</span>
+                            <span th:if="${analysis.priority.name() == 'MEDIUM'}" class="badge bg-info text-dark">MEDIUM</span>
+                            <span th:if="${analysis.priority.name() == 'LOW'}" class="badge bg-light text-dark border">LOW</span>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <span class="text-muted small text-uppercase d-block">Routed Department</span>
+                            <strong class="text-dark fs-6" th:text="${analysis.recommendedDepartment}">Baggage Handling</strong>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-white rounded border mb-3">
+                        <strong class="small text-navy-900 d-block mb-1"><i class="bi bi-key-fill text-muted me-1"></i>Extracted Trigger Keywords:</strong>
+                        <div class="d-flex flex-wrap gap-1">
+                            <span th:each="kw : ${#strings.arraySplit(analysis.extractedKeywords, ', ')}"
+                                  class="badge bg-light text-dark border font-monospace" th:text="${kw}">baggage</span>
+                        </div>
+                    </div>
+
+                    <div class="small text-muted">
+                        <strong class="text-navy-900">Analysis Summary:</strong>
+                        <span th:text="${analysis.summaryReason}">Evaluated via lexicon tokens.</span>
+                    </div>
+
+                    <div th:if="${analysis.urgentSafety}" class="alert alert-danger mt-3 mb-0 py-2 small">
+                        <i class="bi bi-exclamation-octagon-fill me-1"></i>
+                        <strong>Urgent Safety Flag Raised:</strong> This ticket was flagged for immediate human duty supervisor review and terminal operations dispatch.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Complaint Details Card -->
+            <div class="aw-card p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h4 class="fw-bold text-navy-900 m-0" th:text="${complaint.title}">Subject Title</h4>
+                    <span class="badge bg-light text-dark border" th:text="'Category: ' + ${complaint.category}">Category</span>
+                </div>
+
+                <div class="row g-3 small text-muted border-top border-bottom py-2 mb-3 bg-light rounded px-2">
+                    <div class="col-md-3 col-6">
+                        <strong>Airport:</strong> <span th:text="${complaint.airport != null ? complaint.airport.code : 'N/A'}">BOM</span>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <strong>Terminal:</strong> <span th:text="${complaint.terminal}">Terminal 2</span>
+                    </div>
+                    <div class="col-md-3 col-6" th:if="${complaint.flightNumber != null and !complaint.flightNumber.isEmpty()}">
+                        <strong>Flight:</strong> <span class="font-monospace fw-bold text-primary" th:text="${complaint.flightNumber}">AI-245</span>
+                    </div>
+                    <div class="col-md-3 col-6" th:if="${complaint.bookingReference != null and !complaint.bookingReference.isEmpty()}">
+                        <strong>Taxi Ref:</strong> <span class="font-monospace fw-bold text-success" th:text="${complaint.bookingReference}">AW-TX-84912</span>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <strong>Contact Via:</strong> <span th:text="${complaint.preferredContact}">Email</span>
+                    </div>
+                    <div class="col-md-6 col-6">
+                        <strong>Submitted At:</strong> <span th:text="${#temporals.format(complaint.createdAt, 'dd MMM yyyy, HH:mm')}">Date</span>
+                    </div>
+                </div>
+
+                <h6 class="fw-bold text-navy-900 mb-2">Detailed Narrative:</h6>
+                <div class="p-3 bg-light rounded border mb-4 text-dark" style="white-space: pre-wrap;" th:text="${complaint.description}">
+                    Description narrative.
+                </div>
+
+                <!-- Attachment if present -->
+                <div th:if="${complaint.attachmentName != null}" class="mb-4">
+                    <span class="small text-muted fw-semibold d-block mb-1">Attached Evidence:</span>
+                    <span class="badge bg-light text-dark border p-2"><i class="bi bi-paperclip me-1"></i> <span th:text="${complaint.attachmentName}">photo.jpg</span></span>
+                </div>
+
+                <!-- Department Resolution Notes (If any) -->
+                <div th:if="${complaint.resolutionNotes != null and !complaint.resolutionNotes.isEmpty()}" class="p-3 bg-success bg-opacity-10 border border-success rounded">
+                    <h6 class="fw-bold text-success mb-1"><i class="bi bi-check-circle-fill me-1"></i> Operations Response & Resolution:</h6>
+                    <p class="small text-dark m-0" th:text="${complaint.resolutionNotes}">Notes from staff.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

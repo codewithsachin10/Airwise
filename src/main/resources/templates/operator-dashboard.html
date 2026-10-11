@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html_head('Taxi Fleet Operations')}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: alert_ticker}"></div>
+<div th:replace="~{fragments/layout :: navbar}"></div>
+<div th:replace="~{fragments/layout :: flash_messages}"></div>
+
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+        <div>
+            <h2 class="fw-bold text-navy-900 m-0"><i class="bi bi-truck-front text-success me-2"></i>Taxi Fleet Command</h2>
+            <p class="text-muted small m-0">Ground transport operations, vehicle allocation, and arrival demand mobilization.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a th:href="@{/operator/taxis}" class="btn btn-outline-primary btn-sm"><i class="bi bi-car-front me-1"></i> Fleet Inventory</a>
+            <a th:href="@{/operator/bookings}" class="btn btn-airwise btn-sm"><i class="bi bi-journal-check me-1"></i> Incoming Bookings</a>
+        </div>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3 col-6">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-label">Total Registered Fleet</div>
+                        <div class="stat-value text-primary" th:text="${#lists.size(taxis)}">5</div>
+                        <span class="small text-muted">Licensed vehicles</span>
+                    </div>
+                    <div class="stat-icon blue"><i class="bi bi-car-front"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-label">Available Vehicles</div>
+                        <div class="stat-value text-success" th:text="${availableCount}">5</div>
+                        <span class="small text-success fw-bold">Ready at terminal bays</span>
+                    </div>
+                    <div class="stat-icon green"><i class="bi bi-check-circle"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-label">On-Trip / Busy</div>
+                        <div class="stat-value text-warning" th:text="${busyCount}">0</div>
+                        <span class="small text-muted">En route to passenger</span>
+                    </div>
+                    <div class="stat-icon amber"><i class="bi bi-compass"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-label">Upcoming Bookings</div>
+                        <div class="stat-value text-dark" th:text="${#lists.size(bookings)}">2</div>
+                        <span class="small text-muted">Advance reservations</span>
+                    </div>
+                    <div class="stat-icon navy"><i class="bi bi-calendar-event"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobilization Advisory Alert -->
+    <div class="alert alert-warning border-warning shadow-sm mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <i class="bi bi-exclamation-triangle-fill fs-2 text-warning"></i>
+            <div>
+                <strong class="d-block text-dark">Ground Transportation Peak Advisory:</strong>
+                <span class="small text-secondary">
+                    Flight arrivals are forecasted to surge between <strong>18:00 and 21:00</strong>. We recommend taxi operators mobilize at least <strong>15 additional vehicles</strong> to Terminal 2 pre-paid stands to prevent passenger wait times.
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Incoming Bookings Table -->
+    <div class="aw-card mb-4">
+        <div class="aw-card-header">
+            <h5 class="fw-bold m-0 text-navy-900"><i class="bi bi-calendar-check text-primary me-2"></i>Incoming Passenger Reservations</h5>
+            <a th:href="@{/operator/bookings}" class="small text-decoration-none">Manage All Bookings <i class="bi bi-arrow-right"></i></a>
+        </div>
+        <div class="table-responsive">
+            <table class="table-airwise">
+                <thead>
+                    <tr>
+                        <th>Booking Ref</th>
+                        <th>Passenger</th>
+                        <th>Pickup Time</th>
+                        <th>Terminal</th>
+                        <th>Destination</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${#lists.isEmpty(bookings)}">
+                        <td colspan="8" class="text-center py-4 text-muted">No reservations assigned.</td>
+                    </tr>
+                    <tr th:each="b : ${bookings}">
+                        <td>
+                            <strong class="font-monospace text-primary" th:text="${b.bookingReference}">AW-TX-84912</strong>
+                            <div th:if="${b.flight != null}" class="small text-muted" th:text="'Flight ' + ${b.flight.flightNumber}">AI-245</div>
+                        </td>
+                        <td>
+                            <div class="fw-semibold text-dark" th:text="${b.user.fullName}">Passenger</div>
+                            <div class="small text-muted" th:text="${b.user.phone}">Phone</div>
+                        </td>
+                        <td>
+                            <strong th:text="${#temporals.format(b.pickupTime, 'HH:mm')}">16:55</strong>
+                            <div class="small text-muted" th:text="${#temporals.format(b.pickupTime, 'dd MMM')}">Date</div>
+                        </td>
+                        <td th:text="${b.pickupTerminal}">Terminal 2</td>
+                        <td class="text-truncate" style="max-width: 180px;" th:text="${b.destination}">BKC</td>
+                        <td><span class="badge bg-light text-dark border" th:text="${b.requestedTaxiType}">SEDAN</span></td>
+                        <td>
+                            <span th:if="${b.bookingStatus.name() == 'CONFIRMED'}" class="badge bg-success">CONFIRMED</span>
+                            <span th:if="${b.bookingStatus.name() == 'DRIVER_ASSIGNED'}" class="badge bg-primary">DRIVER ASSIGNED</span>
+                            <span th:if="${b.bookingStatus.name() == 'RESCHEDULE_REQUIRED'}" class="badge bg-warning text-dark pulse-badge">RESCHEDULE REQ</span>
+                            <span th:if="${b.bookingStatus.name() == 'COMPLETED'}" class="badge bg-secondary">COMPLETED</span>
+                            <span th:if="${b.bookingStatus.name() == 'CANCELLED'}" class="badge bg-danger">CANCELLED</span>
+                        </td>
+                        <td>
+                            <a th:href="@{/operator/bookings}" class="btn btn-outline-primary btn-sm">Dispatch</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

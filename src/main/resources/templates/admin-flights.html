@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html_head('Flight Management')}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: alert_ticker}"></div>
+<div th:replace="~{fragments/layout :: navbar}"></div>
+<div th:replace="~{fragments/layout :: flash_messages}"></div>
+
+<div class="container py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+        <div>
+            <h2 class="fw-bold text-navy-900 m-0"><i class="bi bi-airplane text-primary me-2"></i>Flight Schedule & Disruption Management</h2>
+            <p class="text-muted small m-0">Monitor flight operational states and broadcast real-time delay reasons to passengers and taxi operators.</p>
+        </div>
+        <a th:href="@{/admin/dashboard}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Operations Command
+        </a>
+    </div>
+
+    <!-- Flight Management Table -->
+    <div class="aw-card">
+        <div class="table-responsive">
+            <table class="table-airwise">
+                <thead>
+                    <tr>
+                        <th>Flight</th>
+                        <th>Airline</th>
+                        <th>Route</th>
+                        <th>Scheduled Schedule</th>
+                        <th>Current Status</th>
+                        <th>Delay Minutes</th>
+                        <th>Confirmed Root Cause</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="f : ${flights}">
+                        <td>
+                            <strong class="font-monospace text-primary fs-6" th:text="${f.flightNumber}">AI-245</strong>
+                            <div class="small text-muted" th:text="${f.terminal}">T2</div>
+                        </td>
+                        <td th:text="${f.airline}">Air India</td>
+                        <td>
+                            <span class="badge bg-light text-dark border fw-bold" th:text="${f.departureAirport.code}">DEL</span>
+                            <i class="bi bi-arrow-right small text-muted mx-1"></i>
+                            <span class="badge bg-light text-dark border fw-bold" th:text="${f.arrivalAirport.code}">BOM</span>
+                        </td>
+                        <td class="small">
+                            <div>Dep: <strong th:text="${#temporals.format(f.scheduledDeparture, 'HH:mm')}">14:00</strong></div>
+                            <div>Arr: <strong th:text="${#temporals.format(f.scheduledArrival, 'HH:mm')}">16:15</strong></div>
+                        </td>
+                        <td>
+                            <span th:if="${f.status.name() == 'ON_TIME'}" class="badge-status badge-on-time">On Time</span>
+                            <span th:if="${f.status.name() == 'DELAYED'}" class="badge-status badge-delayed">Delayed</span>
+                            <span th:if="${f.status.name() == 'CANCELLED'}" class="badge-status badge-cancelled">Cancelled</span>
+                            <span th:if="${f.status.name() == 'LANDED'}" class="badge-status badge-landed">Landed</span>
+                        </td>
+                        <td>
+                            <span th:if="${f.delayMinutes > 0}" class="text-danger fw-bold" th:text="'+' + ${f.delayMinutes} + ' min'">+40 min</span>
+                            <span th:unless="${f.delayMinutes > 0}" class="text-success small">None</span>
+                        </td>
+                        <td class="small text-muted" style="max-width: 200px;">
+                            <span th:if="${f.confirmedDelayReason != null}" class="text-dark" th:text="${f.confirmedDelayReason}">Reason</span>
+                            <span th:unless="${f.confirmedDelayReason != null}" class="fst-italic">Not recorded</span>
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
+                                    th:data-bs-target="'#statusModal' + ${f.id}">
+                                <i class="bi bi-pencil-square me-1"></i> Update Status
+                            </button>
+
+                            <!-- Modal for Status Update -->
+                            <div class="modal fade" th:id="'statusModal' + ${f.id}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form th:action="@{'/admin/flights/' + ${f.id} + '/status'}" method="post">
+                                            <div class="modal-header bg-navy-800 text-white">
+                                                <h5 class="modal-title fs-6">Update Flight <span th:text="${f.flightNumber}">AI-245</span></h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body text-start">
+                                                <div class="mb-3">
+                                                    <label class="form-label small fw-semibold">Flight Status</label>
+                                                    <select name="status" class="form-select">
+                                                        <option th:each="st : ${statuses}" th:value="${st}" th:text="${st}"
+                                                                th:selected="${st == f.status}">ON_TIME</option>
+                                                    </select>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label small fw-semibold">Delay Duration (Minutes)</label>
+                                                    <input type="number" name="delayMinutes" class="form-control" th:value="${f.delayMinutes}" min="0" max="600">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label small fw-semibold">Confirmed Delay Reason</label>
+                                                    <input type="text" name="confirmedReason" class="form-control" th:value="${f.confirmedDelayReason}"
+                                                           placeholder="e.g. Thunderstorm holding pattern, ground maintenance, late inbound...">
+                                                </div>
+                                                <div class="p-2 bg-warning bg-opacity-10 border border-warning rounded small text-dark">
+                                                    <i class="bi bi-info-circle-fill text-warning me-1"></i>
+                                                    Setting status to <strong>DELAYED</strong> will automatically notify passengers and flag connected advance taxi bookings for rescheduling!
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-airwise btn-sm">Save & Broadcast</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

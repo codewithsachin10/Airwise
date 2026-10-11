@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html_head('Register')}"></head>
+<body class="bg-light">
+
+<div th:replace="~{fragments/layout :: navbar}"></div>
+<div th:replace="~{fragments/layout :: flash_messages}"></div>
+
+<div class="container py-5 my-auto">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <div class="aw-card p-4 p-md-5 shadow-lg">
+                <div class="text-center mb-4">
+                    <div class="stat-icon blue mx-auto mb-3" style="width: 56px; height: 56px; font-size: 1.6rem;">
+                        <i class="bi bi-person-plus-fill"></i>
+                    </div>
+                    <h3 class="fw-bold text-navy-900">Create an AIRWISE Account</h3>
+                    <p class="text-muted small">Register to track flights, manage rides, and access airport support.</p>
+                </div>
+
+                <div th:if="${errorMessage}" class="alert alert-danger py-2 small" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i> <span th:text="${errorMessage}">Error</span>
+                </div>
+
+                <form th:action="@{/register}" method="post">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Account Role</label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check border rounded p-2 flex-fill">
+                                    <input class="form-check-input ms-1" type="radio" name="role" id="rolePassenger" value="ROLE_PASSENGER" checked>
+                                    <label class="form-check-label ps-2 small fw-semibold" for="rolePassenger">
+                                        <i class="bi bi-person-fill text-primary me-1"></i> Passenger
+                                    </label>
+                                </div>
+                                <div class="form-check border rounded p-2 flex-fill">
+                                    <input class="form-check-input ms-1" type="radio" name="role" id="roleOperator" value="ROLE_TAXI_OPERATOR">
+                                    <label class="form-check-label ps-2 small fw-semibold" for="roleOperator">
+                                        <i class="bi bi-car-front-fill text-success me-1"></i> Taxi Operator
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="fullName" class="form-label small fw-semibold">Full Name</label>
+                            <input type="text" id="fullName" name="fullName" class="form-control" required placeholder="e.g. John Doe">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="username" class="form-label small fw-semibold">Username / Email</label>
+                            <input type="text" id="username" name="username" class="form-control" required placeholder="e.g. john@example.com">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="phone" class="form-label small fw-semibold">Contact Phone</label>
+                            <input type="tel" id="phone" name="phone" class="form-control" placeholder="+91 98765 43210">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="password" class="form-label small fw-semibold">Password</label>
+                            <input type="password" id="password" name="password" class="form-control" required placeholder="Minimum 6 characters">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="confirmPassword" class="form-label small fw-semibold">Confirm Password</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" required placeholder="Re-enter password">
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <button type="submit" class="btn btn-airwise w-100 py-2 fw-semibold">
+                                Complete Registration
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="text-center mt-4 pt-2 border-top">
+                    <span class="text-muted small">Already have an account? </span>
+                    <a th:href="@{/login}" class="fw-semibold text-primary text-decoration-none small">Sign In</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

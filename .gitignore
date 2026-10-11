@@ -1,9 +1,36 @@
+### Spring Boot / Maven ###
 target/
+*.class
+*.jar
+*.war
+*.ear
+
+### Maven Wrapper (generated, not needed if committed) ###
+# Uncomment below if you do NOT want to commit the Maven wrapper:
+# .mvn/wrapper/maven-wrapper.jar
+
+### IDE ###
 .settings/
 .classpath
 .project
 .bin/
-*.class
-.DS_Store
 .idea/
 *.iml
+*.iws
+.vscode/
+
+### OS ###
+.DS_Store
+Thumbs.db
+desktop.ini
+
+### Logs ###
+*.log
+logs/
+
+### Local Maven install (user-specific) ###
+mvn.cmd
+mvnw.cmd
+
+### Environment ###
+.env

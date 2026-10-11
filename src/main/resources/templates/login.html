@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html_head('Login')}"></head>
+<body class="bg-light">
+
+<div th:replace="~{fragments/layout :: navbar}"></div>
+<div th:replace="~{fragments/layout :: flash_messages}"></div>
+
+<div class="container py-5 my-auto">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="aw-card p-4 p-md-5 shadow-lg">
+                <div class="text-center mb-4">
+                    <div class="stat-icon blue mx-auto mb-3" style="width: 56px; height: 56px; font-size: 1.6rem;">
+                        <i class="bi bi-shield-lock-fill"></i>
+                    </div>
+                    <h3 class="fw-bold text-navy-900">Sign In to AIRWISE</h3>
+                    <p class="text-muted small">Access your flight dashboard, taxi reservations, and airport services.</p>
+                </div>
+
+                <div th:if="${param.error}" class="alert alert-danger py-2 small" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Invalid username or password.
+                </div>
+                <div th:if="${param.logout}" class="alert alert-success py-2 small" role="alert">
+                    <i class="bi bi-check-circle-fill me-1"></i> You have logged out successfully.
+                </div>
+                <div th:if="${param.registered}" class="alert alert-success py-2 small" role="alert">
+                    <i class="bi bi-check-circle-fill me-1"></i> Registration complete! You may now sign in.
+                </div>
+
+                <form th:action="@{/login}" method="post" id="loginForm">
+                    <div class="mb-3">
+                        <label for="usernameInput" class="form-label small fw-semibold">Username / Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-muted"><i class="bi bi-person"></i></span>
+                            <input type="text" id="usernameInput" name="username" class="form-control" required placeholder="Enter username" autofocus>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="passwordInput" class="form-label small fw-semibold">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-muted"><i class="bi bi-key"></i></span>
+                            <input type="password" id="passwordInput" name="password" class="form-control" required placeholder="Enter password">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="rememberMe">
+                            <label class="form-check-label small text-muted" for="rememberMe">Remember me</label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-airwise w-100 py-2 fw-semibold">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Log In
+                    </button>
+                </form>
+
+                <!-- Demo Login Fast Fill Section -->
+                <div class="mt-4 pt-3 border-top text-center">
+                    <span class="small fw-semibold text-secondary d-block mb-2">⚡ Quick Autofill Demo Accounts:</span>
+                    <div class="d-flex flex-wrap gap-2 justify-content-center">
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="fillCredentials('admin', 'admin123')">
+                            <i class="bi bi-shield-shaded me-1"></i> Airport Admin
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="fillCredentials('passenger', 'pass123')">
+                            <i class="bi bi-person me-1"></i> Passenger
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-success" onclick="fillCredentials('operator', 'operator123')">
+                            <i class="bi bi-car-front me-1"></i> Taxi Operator
+                        </button>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4 pt-2">
+                    <span class="text-muted small">Don't have an account? </span>
+                    <a th:href="@{/register}" class="fw-semibold text-primary text-decoration-none small">Register Here</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function fillCredentials(user, pass) {
+        document.getElementById('usernameInput').value = user;
+        document.getElementById('passwordInput').value = pass;
+    }
+
+    // Auto-fill from URL param if present e.g. /login?demo=admin
+    window.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const demo = urlParams.get('demo');
+        if (demo === 'admin') fillCredentials('admin', 'admin123');
+        if (demo === 'passenger') fillCredentials('passenger', 'pass123');
+        if (demo === 'operator') fillCredentials('operator', 'operator123');
+    });
+</script>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

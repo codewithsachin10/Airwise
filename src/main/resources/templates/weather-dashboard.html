@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html_head('Weather Disruption Dashboard')}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: alert_ticker}"></div>
+<div th:replace="~{fragments/layout :: navbar}"></div>
+<div th:replace="~{fragments/layout :: flash_messages}"></div>
+
+<div class="container py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+        <div>
+            <h2 class="fw-bold text-navy-900 m-0"><i class="bi bi-cloud-lightning-rain text-primary me-2"></i>Weather Disruption Dashboard</h2>
+            <p class="text-muted small m-0">Live meteorological observations, runway visibility, and simulated air traffic disruption index.</p>
+        </div>
+        <span class="badge badge-demo"><i class="bi bi-info-circle me-1"></i> Simulated Weather Station Feeds</span>
+    </div>
+
+    <!-- Weather Cards Grid -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6 col-lg-4" th:each="w : ${weatherRecords}">
+            <div class="aw-card h-100">
+                <div class="aw-card-header" th:classappend="${w.disruptionLevel == 'HIGH' ? 'bg-danger bg-opacity-10' : (w.disruptionLevel == 'MEDIUM' ? 'bg-warning bg-opacity-10' : 'bg-light')}">
+                    <div>
+                        <span class="badge bg-dark fw-bold me-1" th:text="${w.airport.code}">BOM</span>
+                        <strong class="text-navy-900" th:text="${w.airport.city}">Mumbai</strong>
+                    </div>
+                    <span class="badge"
+                          th:classappend="${w.disruptionLevel == 'HIGH' ? 'bg-danger' : (w.disruptionLevel == 'MEDIUM' ? 'bg-warning text-dark' : 'bg-success')}"
+                          th:text="${w.disruptionLevel + ' RISK'}">HIGH RISK</span>
+                </div>
+                <div class="aw-card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <i th:if="${w.thunderstorm}" class="bi bi-cloud-lightning-rain-fill text-danger fs-2"></i>
+                            <i th:if="${!w.thunderstorm and w.rainfallMm > 0}" class="bi bi-cloud-rain-fill text-primary fs-2"></i>
+                            <i th:if="${!w.thunderstorm and w.rainfallMm == 0 and w.visibilityKm < 3}" class="bi bi-cloud-fog2-fill text-secondary fs-2"></i>
+                            <i th:if="${!w.thunderstorm and w.rainfallMm == 0 and w.visibilityKm >= 3}" class="bi bi-sun-fill text-warning fs-2"></i>
+                            <div>
+                                <div class="fw-bold fs-5 text-dark" th:text="${w.condition}">Clear</div>
+                                <div class="small text-muted" th:text="${w.temperatureC + '°C'}">28°C</div>
+                            </div>
+                        </div>
+                        <div th:if="${w.thunderstorm}" class="badge bg-danger pulse-badge">
+                            <i class="bi bi-exclamation-diamond me-1"></i> Thunderstorm
+                        </div>
+                    </div>
+
+                    <div class="row g-2 text-center small border rounded p-2 bg-light mb-3">
+                        <div class="col-4">
+                            <div class="text-muted">Rainfall</div>
+                            <strong th:class="${w.rainfallMm > 20 ? 'text-danger' : 'text-dark'}" th:text="${w.rainfallMm + ' mm'}">0 mm</strong>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-muted">Wind Speed</div>
+                            <strong th:class="${w.windSpeedKmh > 40 ? 'text-danger' : 'text-dark'}" th:text="${w.windSpeedKmh + ' km/h'}">14 km/h</strong>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-muted">Visibility</div>
+                            <strong th:class="${w.visibilityKm < 4 ? 'text-danger' : 'text-dark'}" th:text="${w.visibilityKm + ' km'}">10 km</strong>
+                        </div>
+                    </div>
+
+                    <div class="small text-muted mb-3">
+                        <strong class="text-navy-900 d-block mb-1">Operational Impact:</strong>
+                        <span th:if="${w.disruptionLevel == 'HIGH'}">Heavy weather: arrival pacing, potential go-arounds and diversion holds active.</span>
+                        <span th:if="${w.disruptionLevel == 'MEDIUM'}">Moderate conditions: increased inter-arrival spacing and minor taxiway delays.</span>
+                        <span th:if="${w.disruptionLevel == 'LOW'}">Nominal approach and departure conditions under visual flight rules.</span>
+                    </div>
+
+                    <div class="text-end border-top pt-2">
+                        <span class="small text-muted fst-italic" th:text="'Observed: ' + ${#temporals.format(w.recordedAt, 'HH:mm, dd MMM')}">14:00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

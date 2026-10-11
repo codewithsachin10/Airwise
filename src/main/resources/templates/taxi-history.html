@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html_head('Taxi Booking History')}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: alert_ticker}"></div>
+<div th:replace="~{fragments/layout :: navbar}"></div>
+<div th:replace="~{fragments/layout :: flash_messages}"></div>
+
+<div class="container py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+        <div>
+            <h2 class="fw-bold text-navy-900 m-0"><i class="bi bi-clock-history text-primary me-2"></i>My Airport Taxi Bookings</h2>
+            <p class="text-muted small m-0">View, manage, and reschedule your airport arrival rides.</p>
+        </div>
+        <a th:href="@{/taxis/book}" class="btn btn-airwise btn-sm">
+            <i class="bi bi-plus-circle me-1"></i> Book New Ride
+        </a>
+    </div>
+
+    <div class="aw-card">
+        <div class="table-responsive">
+            <table class="table-airwise">
+                <thead>
+                    <tr>
+                        <th>Booking Reference</th>
+                        <th>Pickup Time</th>
+                        <th>Terminal</th>
+                        <th>Destination</th>
+                        <th>Vehicle Type</th>
+                        <th>Fare</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${#lists.isEmpty(bookings)}">
+                        <td colspan="8" class="text-center py-5 text-muted">
+                            <i class="bi bi-car-front fs-2 text-secondary d-block mb-2"></i>
+                            No taxi bookings found.
+                            <div class="mt-2">
+                                <a th:href="@{/taxis/book}" class="btn btn-airwise btn-sm">Reserve Your First Ride</a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:each="b : ${bookings}">
+                        <td>
+                            <a th:href="@{'/taxis/bookings/' + ${b.bookingReference}}" class="fw-bold font-monospace text-primary text-decoration-none" th:text="${b.bookingReference}">
+                                AW-TX-84912
+                            </a>
+                            <div th:if="${b.flight != null}" class="small text-muted" th:text="'Flight ' + ${b.flight.flightNumber}">AI-245</div>
+                        </td>
+                        <td>
+                            <strong th:text="${#temporals.format(b.pickupTime, 'HH:mm')}">16:55</strong>
+                            <div class="small text-muted" th:text="${#temporals.format(b.pickupTime, 'dd MMM yyyy')}">12 Oct 2026</div>
+                        </td>
+                        <td th:text="${b.pickupTerminal}">Terminal 2</td>
+                        <td class="text-truncate" style="max-width: 180px;" th:text="${b.destination}">Bandra Kurla Complex</td>
+                        <td>
+                            <span class="badge bg-light text-dark border" th:text="${b.requestedTaxiType}">SEDAN</span>
+                        </td>
+                        <td>
+                            <strong class="text-success" th:text="'₹' + ${#numbers.formatDecimal(b.estimatedFare, 1, 2)}">₹780.00</strong>
+                        </td>
+                        <td>
+                            <span th:if="${b.bookingStatus.name() == 'CONFIRMED'}" class="badge bg-success">CONFIRMED</span>
+                            <span th:if="${b.bookingStatus.name() == 'DRIVER_ASSIGNED'}" class="badge bg-primary">DRIVER ASSIGNED</span>
+                            <span th:if="${b.bookingStatus.name() == 'RESCHEDULE_REQUIRED'}" class="badge bg-warning text-dark pulse-badge">RESCHEDULE REQ</span>
+                            <span th:if="${b.bookingStatus.name() == 'COMPLETED'}" class="badge bg-secondary">COMPLETED</span>
+                            <span th:if="${b.bookingStatus.name() == 'CANCELLED'}" class="badge bg-danger">CANCELLED</span>
+                        </td>
+                        <td>
+                            <a th:href="@{'/taxis/bookings/' + ${b.bookingReference}}" class="btn btn-outline-primary btn-sm">
+                                View Pass
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>
