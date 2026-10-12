@@ -34,3 +34,10 @@ mvnw.cmd
 
 ### Environment ###
 .env
+
+### Python ###
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+/instance/

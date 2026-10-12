@@ -1,0 +1,3 @@
+{% extends "base.html" %}
+{% block title %}Access Restricted · AIRWISE{% endblock %}
+{% block content %}<section class="auth-wrap"><div class="auth-panel"><p class="eyebrow">403 · ACCESS RESTRICTED</p><h1>Access restricted</h1><p class="muted">Your account does not have permission to view this operations section.</p><div class="form-actions"><a class="button button-outline" href="{{ url_for('index') }}">Return home</a><a class="button button-primary" href="{{ url_for('login') }}">Switch account</a></div></div></section>{% endblock %}

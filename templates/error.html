@@ -1,0 +1,3 @@
+{% extends "base.html" %}
+{% block title %}Operational Notice · AIRWISE{% endblock %}
+{% block content %}<section class="auth-wrap"><div class="auth-panel"><p class="eyebrow">OPERATIONAL NOTICE</p><h1>Page not found</h1><p class="muted">The requested airport resource could not be loaded. Check the address or return to the main hub.</p><div class="form-actions"><a class="button button-outline" href="{{ url_for('index') }}">Go home</a><a class="button button-primary" href="{{ url_for('search_flights') }}">Search flights</a></div></div></section>{% endblock %}
