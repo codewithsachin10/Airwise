@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -21,15 +21,14 @@ class VercelPathFixMiddleware:
         self.wsgi_app = wsgi_app
 
     def __call__(self, environ, start_response):
-        # Vercel supplies original request path in X-Forwarded-Uri or X-Matched-Path
-        forwarded_uri = (
-            environ.get("HTTP_X_FORWARDED_URI")
-            or environ.get("HTTP_X_MATCHED_PATH")
-            or environ.get("HTTP_X_ORIGINAL_URI")
-        )
-        if forwarded_uri:
-            path = urlsplit(forwarded_uri).path
-            environ["PATH_INFO"] = path
+        qs = parse_qs(environ.get("QUERY_STRING", ""), keep_blank_values=True)
+        if "__path__" in qs:
+            target = qs["__path__"][0]
+            if not target.startswith("/"):
+                target = "/" + target
+            environ["PATH_INFO"] = target
+        elif environ.get("HTTP_X_FORWARDED_URI"):
+            environ["PATH_INFO"] = urlsplit(environ["HTTP_X_FORWARDED_URI"]).path
         else:
             path_info = environ.get("PATH_INFO", "")
             for prefix in ("/api/index.py", "/api/index", "/api"):

@@ -1035,18 +1035,21 @@ def create_app(test_config=None):
             from seed_data import seed_demo_data
             seed_demo_data()
 
+    from urllib.parse import parse_qs
+
     class VercelPathFixMiddleware:
         def __init__(self, wsgi_app):
             self.wsgi_app = wsgi_app
 
         def __call__(self, environ, start_response):
-            forwarded_uri = (
-                environ.get("HTTP_X_FORWARDED_URI")
-                or environ.get("HTTP_X_MATCHED_PATH")
-                or environ.get("HTTP_X_ORIGINAL_URI")
-            )
-            if forwarded_uri:
-                environ["PATH_INFO"] = urlsplit(forwarded_uri).path
+            qs = parse_qs(environ.get("QUERY_STRING", ""), keep_blank_values=True)
+            if "__path__" in qs:
+                target = qs["__path__"][0]
+                if not target.startswith("/"):
+                    target = "/" + target
+                environ["PATH_INFO"] = target
+            elif environ.get("HTTP_X_FORWARDED_URI"):
+                environ["PATH_INFO"] = urlsplit(environ["HTTP_X_FORWARDED_URI"]).path
             else:
                 path_info = environ.get("PATH_INFO", "")
                 for prefix in ("/api/index.py", "/api/index", "/api"):
