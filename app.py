@@ -1035,6 +1035,31 @@ def create_app(test_config=None):
             from seed_data import seed_demo_data
             seed_demo_data()
 
+    class VercelPathFixMiddleware:
+        def __init__(self, wsgi_app):
+            self.wsgi_app = wsgi_app
+
+        def __call__(self, environ, start_response):
+            forwarded_uri = (
+                environ.get("HTTP_X_FORWARDED_URI")
+                or environ.get("HTTP_X_MATCHED_PATH")
+                or environ.get("HTTP_X_ORIGINAL_URI")
+            )
+            if forwarded_uri:
+                environ["PATH_INFO"] = urlsplit(forwarded_uri).path
+            else:
+                path_info = environ.get("PATH_INFO", "")
+                for prefix in ("/api/index.py", "/api/index", "/api"):
+                    if path_info.startswith(prefix):
+                        remainder = path_info[len(prefix):]
+                        environ["PATH_INFO"] = remainder if remainder.startswith("/") else "/" + remainder.lstrip("/")
+                        break
+            return self.wsgi_app(environ, start_response)
+
+    from werkzeug.middleware.proxy_fix import ProxyFix
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
+    app.wsgi_app = VercelPathFixMiddleware(app.wsgi_app)
+
     return app
 
 
