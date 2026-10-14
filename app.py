@@ -56,8 +56,23 @@ from models import (
 
 
 ROOT = Path(__file__).resolve().parent
-INSTANCE_DIR = ROOT / "instance"
-INSTANCE_DIR.mkdir(exist_ok=True)
+
+# On serverless environments (Vercel, AWS Lambda), the deployment filesystem is read-only.
+# Fallback to /tmp/instance when running on Vercel or when the local directory is not writable.
+if os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"):
+    INSTANCE_DIR = Path("/tmp/instance")
+else:
+    INSTANCE_DIR = ROOT / "instance"
+
+try:
+    INSTANCE_DIR.mkdir(parents=True, exist_ok=True)
+except Exception:
+    INSTANCE_DIR = Path("/tmp/instance")
+    try:
+        INSTANCE_DIR.mkdir(parents=True, exist_ok=True)
+    except Exception:
+        INSTANCE_DIR = ROOT
+
 load_dotenv(ROOT / ".env")
 
 
@@ -88,11 +103,18 @@ def _database_uri():
         configured = urlunsplit(("mysql+pymysql", f"{credentials}{host}{port}", database, query, ""))
     elif configured.startswith("mysql://"):
         configured = "mysql+pymysql://" + configured[len("mysql://"):]
+    elif configured.startswith("postgres://"):
+        configured = "postgresql://" + configured[len("postgres://"):]
     return configured
 
 
 def create_app(test_config=None):
-    app = Flask(__name__, instance_path=str(INSTANCE_DIR))
+    app = Flask(
+        __name__,
+        instance_path=str(INSTANCE_DIR),
+        template_folder=str(ROOT / "templates"),
+        static_folder=str(ROOT / "static"),
+    )
     app.config.update(
         SECRET_KEY=os.getenv("SECRET_KEY", "airwise-local-development-key"),
         SQLALCHEMY_DATABASE_URI=_database_uri(),

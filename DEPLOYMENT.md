@@ -69,6 +69,29 @@ The default Blueprint disables demo seeding. New production databases therefore
 start without sample operational records; load authorized airport data through
 an approved process before relying on analytics.
 
+## Vercel deployment
+
+The repository includes `vercel.json`, `api/index.py`, and `.vercelignore` for
+Vercel's Python serverless runtime.
+
+1. Push your repository to GitHub / GitLab / Bitbucket.
+2. In Vercel, click **Add New → Project** and import the repository.
+3. Framework Preset: Leave as **Other**.
+4. In **Environment Variables**, set:
+   - `SECRET_KEY`: A long, random secret key string.
+   - `DATABASE_URL`: Your persistent cloud database connection string:
+     - MySQL (Recommended): `mysql+pymysql://<user>:<password>@<host>:3306/<dbname>?charset=utf8mb4`
+     - PostgreSQL: `postgresql://<user>:<password>@<host>:5432/<dbname>`
+   - `AIRWISE_DEMO_MODE`: `false` for a blank production database, or `true` if you
+     also provide `AIRWISE_DEMO_ADMIN_PASSWORD`, `AIRWISE_DEMO_PASSENGER_PASSWORD`,
+     `AIRWISE_DEMO_OPERATOR_PASSWORD`, and `AIRWISE_DEMO_PRIYA_PASSWORD`.
+5. Click **Deploy**. Vercel will bundle the serverless function, static assets,
+   and Jinja templates via `api/index.py`.
+
+> **Note on persistence**: Serverless environments have an ephemeral, read-only
+> filesystem. Do not rely on local SQLite for persistent user bookings or
+> reports on Vercel; connect an external cloud database via `DATABASE_URL`.
+
 ## Docker
 
 ```powershell

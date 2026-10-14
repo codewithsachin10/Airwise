@@ -1,0 +1,13 @@
+.venv/
+venv/
+instance/
+tests/
+src/
+legacy_javafx/
+__pycache__/
+*.py[cod]
+.git/
+.gitignore
+.env
+Dockerfile
+render.yaml
